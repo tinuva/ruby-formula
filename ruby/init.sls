@@ -17,3 +17,5 @@ old_ruby_purged:
       - libreadline5
       - libruby1.8
       - ruby1.8-dev
+      - ruby
+      - ruby-libs
