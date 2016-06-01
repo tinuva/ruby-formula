@@ -57,6 +57,9 @@ get_ruby:
       - pkg: ruby_source_installer_packages
     - watch:
       - file: get_ruby
+    - unless:
+      - ruby --version | grep {{ version }}
+      - test -f {{ ruby_package }}
 
 ruby:
   cmd.wait:
@@ -66,3 +69,26 @@ ruby:
       - module: get_ruby
     - require:
       - pkg: old_ruby_purged
+    - unless:
+        - ruby --version | grep {{ version }}
+
+bundler:
+  cmd.wait:
+    - name: gem install bundler --no-ri --no-rdoc
+    - watch:
+      - cmd: ruby
+    - require:
+      - cmd: ruby
+
+# add symlinks to /usr/bin for the three go commands
+{% for i in ['ruby', 'bundle', 'bundler'] %}
+ruby|create-symlink-{{ i }}:
+  alternatives.install:
+    - name: link-{{ i }}
+    - link: /usr/bin/{{ i }}
+    - path: /usr/local/bin/{{ i }}
+    - priority: 40
+    - order: 10
+    - watch:
+      - module: get_ruby
+{% endfor %}
