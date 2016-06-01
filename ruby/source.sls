@@ -82,13 +82,24 @@ bundler:
 
 # add symlinks to /usr/bin for the three go commands
 {% for i in ['ruby', 'bundle', 'bundler'] %}
-ruby|create-symlink-{{ i }}:
+ruby|create-alternative-symlink-{{ i }}:
   alternatives.install:
     - name: link-{{ i }}
     - link: /usr/bin/{{ i }}
     - path: /usr/local/bin/{{ i }}
     - priority: 40
     - order: 10
+    - require:
+      - cmd: ruby
     - watch:
-      - module: get_ruby
+      - cmd: ruby
+
+ruby|create-symlink-{{ i }}:
+  file.symlink:
+    - name: /usr/bin/{{ i }}
+    - target: /usr/local/bin/{{ i }}
+    - require:
+      - cmd: ruby
+    - watch:
+      - cmd: ruby
 {% endfor %}
